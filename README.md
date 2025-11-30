@@ -1,6 +1,18 @@
 # Respectlytics Flutter SDK
 
-Official Respectlytics SDK for Flutter. Privacy-first analytics.
+[![pub package](https://img.shields.io/pub/v/respectlytics_flutter.svg)](https://pub.dev/packages/respectlytics_flutter)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+
+Official Respectlytics SDK for Flutter. Privacy-first analytics that respects your users.
+
+## Features
+
+- 🔒 **No device identifiers** - No IDFA, GAID, or fingerprinting
+- 🎲 **Random user IDs** - Not linked to device or personal data
+- 🗑️ **Auto-cleanup** - Uninstall clears all data
+- 📱 **Cross-platform** - iOS, Android, macOS, Linux, Windows
+- ⚡ **Offline-first** - Events queue and sync when online
+- 💾 **Never lose events** - Persisted immediately, survives crashes
 
 ## Installation
 
@@ -20,6 +32,7 @@ flutter pub add respectlytics_flutter
 ## Quick Start
 
 ```dart
+import 'package:flutter/material.dart';
 import 'package:respectlytics_flutter/respectlytics_flutter.dart';
 
 void main() async {
@@ -55,12 +68,23 @@ Clear the user ID. Call when user logs out.
 ### `flush()`
 Force send queued events. Rarely needed - SDK auto-flushes.
 
-## Privacy
+## Privacy by Design
 
-- ✅ No device identifiers collected (no IDFA, GAID, etc.)
-- ✅ User IDs are random, not linked to device
-- ✅ Uninstall clears all data
-- ✅ No custom properties - only screen name allowed
+| What we DON'T collect | Why |
+|----------------------|-----|
+| IDFA / GAID | Device advertising IDs can track users across apps |
+| Device fingerprints | Can be used to identify users without consent |
+| IP addresses | Stored temporarily for geolocation, then discarded |
+| Custom properties | Prevents accidental PII collection |
+
+| What we DO collect | Purpose |
+|-------------------|---------|
+| Event name | Analytics |
+| Screen name | Navigation analytics |
+| Random session ID | Group events in a session |
+| Random user ID (opt-in) | Cross-session analytics |
+| Platform, OS version | Debugging |
+| App version | Debugging |
 
 ## Event Queue Behavior
 
@@ -74,18 +98,25 @@ Events are queued and sent automatically:
 
 ## Platform Support
 
-| Platform | Support |
-|----------|---------|
-| iOS      | ✅      |
-| Android  | ✅      |
-| macOS    | ✅      |
-| Linux    | ✅      |
-| Windows  | ✅      |
+| Platform | Supported |
+|----------|-----------|
+| iOS      | ✅        |
+| Android  | ✅        |
+| macOS    | ✅        |
+| Linux    | ✅        |
+| Windows  | ✅        |
+| Web      | ❌        |
 
 ## Requirements
 
 - Flutter 3.10+
 - Dart 3.0+
+
+## Getting Help
+
+- 📖 [Documentation](https://respectlytics.com/docs)
+- 🐛 [Issue Tracker](https://github.com/respectlytics/respectlytics-flutter/issues)
+- 💬 [Support](https://respectlytics.com/support)
 
 ## License
 

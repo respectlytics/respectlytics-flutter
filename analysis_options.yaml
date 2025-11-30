@@ -1,0 +1,8 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Allow print statements for SDK logging
+    avoid_print: false
+    # Allow library name for documentation
+    unnecessary_library_name: false

@@ -1,6 +1,6 @@
 name: respectlytics_flutter
 description: Official Respectlytics SDK for Flutter - Privacy-first analytics with no device identifiers, no IDFA/GAID, and automatic data deletion on uninstall.
-version: 1.0.0
+version: 1.0.1
 homepage: https://respectlytics.com
 repository: https://github.com/respectlytics/respectlytics-flutter
 issue_tracker: https://github.com/respectlytics/respectlytics-flutter/issues

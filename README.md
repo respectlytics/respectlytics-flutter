@@ -20,7 +20,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  respectlytics_flutter: ^1.0.0
+  respectlytics_flutter: ^1.0.1
 ```
 
 Or run:
@@ -53,19 +53,19 @@ await Respectlytics.track('purchase', screen: 'CheckoutScreen');
 
 ## API Reference
 
-### `configure(apiKey:)`
-Initialize the SDK. Call once in your `main()` before `runApp()`.
+### \`configure(apiKey:)\`
+Initialize the SDK. Call once in your \`main()\` before \`runApp()\`.
 
-### `track(eventName, {screen})`
+### \`track(eventName, {screen})\`
 Track an event with optional screen name. Custom properties are not supported (privacy by design).
 
-### `identify()`
+### \`identify()\`
 Enable cross-session user tracking. Generates and persists a random user ID.
 
-### `reset()`
+### \`reset()\`
 Clear the user ID. Call when user logs out.
 
-### `flush()`
+### \`flush()\`
 Force send queued events. Rarely needed - SDK auto-flushes.
 
 ## Privacy by Design
@@ -74,7 +74,7 @@ Force send queued events. Rarely needed - SDK auto-flushes.
 |----------------------|-----|
 | IDFA / GAID | Device advertising IDs can track users across apps |
 | Device fingerprints | Can be used to identify users without consent |
-| IP addresses | Stored temporarily for geolocation, then discarded |
+| IP addresses | Used only for geolocation lookup, then discarded |
 | Custom properties | Prevents accidental PII collection |
 
 | What we DO collect | Purpose |
@@ -92,9 +92,9 @@ Events are queued and sent automatically:
 - Every 30 seconds
 - When 10 events are queued
 - When app goes to background
-- When `flush()` is called
+- When \`flush()\` is called
 
-**Events are NEVER lost**: They are persisted to SharedPreferences immediately on every `track()` call, surviving force-quit, crashes, and app termination.
+**Events are NEVER lost**: They are persisted to SharedPreferences immediately on every \`track()\` call, surviving force-quit, crashes, and app termination.
 
 ## Platform Support
 

@@ -1,0 +1,26 @@
+# Files to exclude from pub.dev package
+
+# Test files - for development only
+test/
+
+# Build artifacts
+build/
+.dart_tool/
+
+# Environment files
+.env
+.env.*
+.env.testing.example
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Other
+.metadata
+*.lock

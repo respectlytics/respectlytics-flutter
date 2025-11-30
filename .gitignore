@@ -29,3 +29,8 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+
+# Environment files (contain API keys)
+.env
+.env.*
+!.env.testing.example

@@ -1,36 +1,69 @@
+# ===========================================
+# Respectlytics Flutter SDK
+# ===========================================
+
+# ------------------------------------------
+# macOS
+# ------------------------------------------
+.DS_Store
+._*
+
+# ------------------------------------------
 # Miscellaneous
+# ------------------------------------------
 *.class
 *.log
 *.pyc
 *.swp
-.DS_Store
 .atom/
 .buildlog/
 .history
 .svn/
 migrate_working_dir/
 
-# IntelliJ related
+# ------------------------------------------
+# IntelliJ / Android Studio
+# ------------------------------------------
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# ------------------------------------------
+# VS Code
+# ------------------------------------------
+.vscode/
 
-# Flutter/Dart/Pub related
-# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
-/pubspec.lock
+# ------------------------------------------
+# Flutter/Dart/Pub
+# ------------------------------------------
+# Libraries should not include pubspec.lock
+pubspec.lock
 **/doc/api/
 .dart_tool/
 .flutter-plugins-dependencies
 /build/
 /coverage/
 
-# Environment files (contain API keys)
+# ------------------------------------------
+# Secrets & Environment Variables (SECURITY CRITICAL)
+# ------------------------------------------
 .env
 .env.*
 !.env.testing.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+**/credentials.json
+**/secrets.json
+**/google-services.json
+secrets/
+.secrets/
+
+# ------------------------------------------
+# Security Tools
+# ------------------------------------------
+.gitleaks.toml

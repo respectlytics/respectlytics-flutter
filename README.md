@@ -14,7 +14,7 @@ Official Respectlytics SDK for Flutter. Privacy-first analytics that respects yo
 - 📱 **Cross-platform** - iOS, Android, macOS, Linux, Windows
 - ⚡ **Offline-first** - Events queue and sync when online
 - 💾 **Never lose events** - Persisted immediately, survives crashes
-- ✅ **GDPR/ePrivacy compliant** - No consent required
+- ✅ **Designed for GDPR/ePrivacy compliance** - Potentially consent-free
 
 ## Installation
 

@@ -1,4 +1,4 @@
-// Integration test for Respectlytics Flutter SDK
+// Integration test for Respectlytics Flutter SDK v2.0.0
 // Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart
 
 import 'dart:convert';
@@ -6,10 +6,10 @@ import 'dart:io';
 
 // Read API key from environment variable
 final String? testApiKey = Platform.environment['RESPECTLYTICS_TEST_API_KEY'];
-const String baseUrl = 'http://127.0.0.1:8000/api/v1';
+const String baseUrl = 'http://127.0.0.1:8080/api/v1';
 
 Future<void> main() async {
-  print('🧪 Respectlytics Flutter SDK Integration Tests\n');
+  print('🧪 Respectlytics Flutter SDK v2.0.0 Integration Tests\n');
   
   // Check for API key
   if (testApiKey == null || testApiKey!.isEmpty) {
@@ -24,8 +24,8 @@ Future<void> main() async {
   var passed = 0;
   var failed = 0;
 
-  // Test 1: Valid event submission
-  print('Test 1: Valid event submission...');
+  // Test 1: Valid event submission (session-based, no user_id)
+  print('Test 1: Valid event submission (session-based)...');
   try {
     final result = await sendEvent({
       'event_name': 'integration_test_event',
@@ -33,7 +33,7 @@ Future<void> main() async {
       'session_id': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
       'platform': 'iOS',
       'os_version': '17.1',
-      'app_version': '1.0.0',
+      'app_version': '2.0.0',
       'locale': 'en_US',
       'device_type': 'phone',
     });
@@ -50,22 +50,22 @@ Future<void> main() async {
     failed++;
   }
 
-  // Test 2: Event with user_id
-  print('\nTest 2: Event with user_id...');
+  // Test 2: Event with screen parameter
+  print('\nTest 2: Event with screen parameter...');
   try {
     final result = await sendEvent({
-      'event_name': 'user_event_test',
+      'event_name': 'screen_view',
       'timestamp': DateTime.now().toUtc().toIso8601String(),
-      'session_id': 'b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5',
-      'user_id': 'c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6',
-      'platform': 'Android',
-      'os_version': '14.0',
+      'session_id': 'd4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1',
+      'screen': 'HomeScreen',
+      'platform': 'iOS',
+      'os_version': '17.0',
       'app_version': '2.0.0',
-      'locale': 'de_DE',
-      'device_type': 'tablet',
+      'locale': 'en_US',
+      'device_type': 'phone',
     });
     if (result['statusCode'] == 201) {
-      print('  ✅ PASSED: Event with user_id created');
+      print('  ✅ PASSED: Event with screen created');
       passed++;
     } else {
       print('  ❌ FAILED: Expected 201, got ${result['statusCode']}');
@@ -77,22 +77,21 @@ Future<void> main() async {
     failed++;
   }
 
-  // Test 3: Event with screen
-  print('\nTest 3: Event with screen parameter...');
+  // Test 3: Event from Android platform
+  print('\nTest 3: Event from Android platform...');
   try {
     final result = await sendEvent({
-      'event_name': 'screen_view',
+      'event_name': 'android_test_event',
       'timestamp': DateTime.now().toUtc().toIso8601String(),
-      'session_id': 'd4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1',
-      'screen': 'HomeScreen',
-      'platform': 'iOS',
-      'os_version': '17.0',
-      'app_version': '1.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
+      'session_id': 'b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5',
+      'platform': 'Android',
+      'os_version': '14.0',
+      'app_version': '2.0.0',
+      'locale': 'de_DE',
+      'device_type': 'tablet',
     });
     if (result['statusCode'] == 201) {
-      print('  ✅ PASSED: Event with screen created');
+      print('  ✅ PASSED: Android event created');
       passed++;
     } else {
       print('  ❌ FAILED: Expected 201, got ${result['statusCode']}');
@@ -113,7 +112,7 @@ Future<void> main() async {
       'session_id': 'e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
       'platform': 'iOS',
       'os_version': '17.0',
-      'app_version': '1.0.0',
+      'app_version': '2.0.0',
       'locale': 'en_US',
       'device_type': 'phone',
     }, apiKey: 'invalid-api-key-12345');
@@ -137,7 +136,7 @@ Future<void> main() async {
       'session_id': 'f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3',
       'platform': 'iOS',
       'os_version': '17.0',
-      'app_version': '1.0.0',
+      'app_version': '2.0.0',
       'locale': 'en_US',
       'device_type': 'phone',
     });
@@ -163,7 +162,7 @@ Future<void> main() async {
       'session_id': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
       'platform': 'iOS',
       'os_version': '17.0',
-      'app_version': '1.0.0',
+      'app_version': '2.0.0',
       'locale': 'en_US',
       'device_type': 'phone',
     });
@@ -172,6 +171,32 @@ Future<void> main() async {
       passed++;
     } else {
       print('  ❌ FAILED: Expected 400, got ${result['statusCode']}');
+      print('     Response: ${result['body']}');
+      failed++;
+    }
+  } catch (e) {
+    print('  ❌ FAILED: $e');
+    failed++;
+  }
+
+  // Test 7: Session ID format validation (32 hex chars)
+  print('\nTest 7: Session ID format validation...');
+  try {
+    final result = await sendEvent({
+      'event_name': 'session_format_test',
+      'timestamp': DateTime.now().toUtc().toIso8601String(),
+      'session_id': 'abcdef0123456789abcdef0123456789', // Valid 32 hex chars
+      'platform': 'iOS',
+      'os_version': '17.0',
+      'app_version': '2.0.0',
+      'locale': 'en_US',
+      'device_type': 'phone',
+    });
+    if (result['statusCode'] == 201) {
+      print('  ✅ PASSED: Valid session ID format accepted');
+      passed++;
+    } else {
+      print('  ❌ FAILED: Expected 201, got ${result['statusCode']}');
       print('     Response: ${result['body']}');
       failed++;
     }

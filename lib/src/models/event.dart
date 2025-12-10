@@ -3,11 +3,13 @@
 // See LICENSE file for terms.
 
 /// Event data model matching the API payload format.
+/// 
+/// Note: user_id is not included - Respectlytics v2.0.0 uses
+/// session-based analytics only for GDPR/ePrivacy compliance.
 class Event {
   final String eventName;
   final String timestamp;
   final String sessionId;
-  final String? userId;
   final String? screen;
   final String platform;
   final String osVersion;
@@ -19,7 +21,6 @@ class Event {
     required this.eventName,
     required this.timestamp,
     required this.sessionId,
-    this.userId,
     this.screen,
     required this.platform,
     required this.osVersion,
@@ -41,10 +42,6 @@ class Event {
       'device_type': deviceType,
     };
 
-    if (userId != null) {
-      json['user_id'] = userId;
-    }
-
     if (screen != null) {
       json['screen'] = screen;
     }
@@ -58,7 +55,6 @@ class Event {
       eventName: json['event_name'] as String,
       timestamp: json['timestamp'] as String,
       sessionId: json['session_id'] as String,
-      userId: json['user_id'] as String?,
       screen: json['screen'] as String?,
       platform: json['platform'] as String,
       osVersion: json['os_version'] as String,

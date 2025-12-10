@@ -7,17 +7,31 @@ import 'dart:async';
 import 'configuration.dart';
 import 'event_queue.dart';
 import 'session_manager.dart';
-import 'user_manager.dart';
 import 'models/event.dart';
 import 'device_info.dart';
 
 /// Main entry point for the Respectlytics SDK.
 /// 
 /// All methods are static for easy access throughout your app.
+/// 
+/// ## Public API (v2.0.0)
+/// 
+/// - `configure(apiKey:)` - Initialize SDK (call once at app launch)
+/// - `track(eventName, screen:)` - Track an event
+/// - `flush()` - Force send queued events
+/// 
+/// ## Session Management
+/// 
+/// Sessions are managed automatically:
+/// - New session ID generated on every app launch
+/// - Sessions rotate automatically after 2 hours of use
+/// - Session IDs are stored in RAM only (never persisted to disk)
+/// 
+/// This design ensures GDPR and ePrivacy Directive compliance without
+/// requiring user consent.
 class Respectlytics {
   static Configuration? _configuration;
   static SessionManager? _sessionManager;
-  static UserManager? _userManager;
   static EventQueue? _eventQueue;
   static DeviceInfo? _deviceInfo;
 
@@ -40,15 +54,13 @@ class Respectlytics {
 
     _configuration = Configuration(apiKey: apiKey);
     _sessionManager = SessionManager();
-    _userManager = UserManager();
     _deviceInfo = DeviceInfo();
     _eventQueue = EventQueue(configuration: _configuration!);
 
-    await _userManager!.load();
     await _eventQueue!.load();
     await _deviceInfo!.load();
 
-    print('[Respectlytics] ✓ SDK configured');
+    print('[Respectlytics] ✓ SDK configured (v2.0.0)');
   }
 
   /// Track an event with optional screen name.
@@ -79,7 +91,6 @@ class Respectlytics {
       eventName: eventName,
       timestamp: DateTime.now().toUtc().toIso8601String(),
       sessionId: _sessionManager!.getSessionId(),
-      userId: _userManager!.userId,
       screen: screen,
       platform: _deviceInfo!.platform,
       osVersion: _deviceInfo!.osVersion,
@@ -89,42 +100,6 @@ class Respectlytics {
     );
 
     await _eventQueue!.add(event);
-  }
-
-  /// Enable cross-session user tracking.
-  /// 
-  /// Generates and persists a random user ID. All subsequent events
-  /// will include this ID until [reset] is called.
-  /// 
-  /// ```dart
-  /// await Respectlytics.identify();
-  /// ```
-  static Future<void> identify() async {
-    if (_configuration == null) {
-      print('[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.');
-      return;
-    }
-
-    await _userManager!.identify();
-    print('[Respectlytics] ✓ User identified');
-  }
-
-  /// Clear the user ID.
-  /// 
-  /// Call this when user logs out. Subsequent events will be anonymous
-  /// until [identify] is called again.
-  /// 
-  /// ```dart
-  /// await Respectlytics.reset();
-  /// ```
-  static Future<void> reset() async {
-    if (_configuration == null) {
-      print('[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.');
-      return;
-    }
-
-    await _userManager!.reset();
-    print('[Respectlytics] ✓ User reset');
   }
 
   /// Force send queued events.

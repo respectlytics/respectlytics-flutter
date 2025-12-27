@@ -10,17 +10,17 @@ const String baseUrl = 'http://127.0.0.1:8080/api/v1';
 
 Future<void> main() async {
   print('🧪 Respectlytics Flutter SDK v2.0.0 Integration Tests\n');
-  
+
   // Check for API key
   if (testApiKey == null || testApiKey!.isEmpty) {
     print('⚠️  RESPECTLYTICS_TEST_API_KEY environment variable not set');
     print('   Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart');
     exit(1);
   }
-  
+
   print('✅ API Key: Found (from environment)');
   print('🔗 Server: $baseUrl\n');
-  
+
   var passed = 0;
   var failed = 0;
 
@@ -224,16 +224,16 @@ Future<Map<String, dynamic>> sendEvent(
   try {
     final jsonBody = jsonEncode(event);
     final bodyBytes = utf8.encode(jsonBody);
-    
+
     final request = await client.postUrl(Uri.parse('$baseUrl/events/'));
     request.headers.set('Content-Type', 'application/json');
     request.headers.set('X-App-Key', apiKey ?? testApiKey!);
     request.headers.set('Content-Length', bodyBytes.length.toString());
     request.add(bodyBytes);
-    
+
     final response = await request.close();
     final body = await response.transform(utf8.decoder).join();
-    
+
     return {'statusCode': response.statusCode, 'body': body};
   } finally {
     client.close();

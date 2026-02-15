@@ -1,6 +1,5 @@
 // Respectlytics SDK for Flutter
-// Copyright (c) 2025 Respectlytics. All rights reserved.
-// See LICENSE file for terms.
+// Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 import 'dart:async';
 import 'dart:convert';
@@ -14,7 +13,7 @@ import 'models/event.dart';
 import 'network_client.dart';
 
 /// Manages event queue, persistence, and automatic flushing.
-/// 
+///
 /// CRITICAL: Events are IMMEDIATELY persisted on every add() call.
 /// This ensures events survive force-quit, crashes, and app termination.
 class EventQueue with WidgetsBindingObserver {
@@ -35,10 +34,10 @@ class EventQueue with WidgetsBindingObserver {
       : _networkClient = networkClient ?? NetworkClient(configuration: configuration) {
     // Observe app lifecycle for background flush
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Monitor connectivity
     _setupConnectivityMonitor();
-    
+
     // Start flush timer
     _startFlushTimer();
   }
@@ -47,7 +46,7 @@ class EventQueue with WidgetsBindingObserver {
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_persistenceKey);
-    
+
     if (jsonString != null) {
       try {
         final jsonList = jsonDecode(jsonString) as List;
@@ -60,15 +59,15 @@ class EventQueue with WidgetsBindingObserver {
   }
 
   /// Add event to queue with IMMEDIATE persistence.
-  /// 
+  ///
   /// Events are persisted BEFORE any network operations to ensure
   /// they survive force-quit, crashes, and app termination.
   Future<void> add(Event event) async {
     _events.add(event);
-    
+
     // CRITICAL: Persist immediately before any async operations
     await _persistQueue();
-    
+
     // Check if we should flush
     if (_events.length >= _maxQueueSize) {
       await flush();
@@ -85,7 +84,7 @@ class EventQueue with WidgetsBindingObserver {
 
     // Take a copy of events to send
     final eventsToSend = List<Event>.from(_events);
-    
+
     // Clear queue and persist (events will be re-added on failure)
     _events.clear();
     await _persistQueue();
@@ -117,7 +116,7 @@ class EventQueue with WidgetsBindingObserver {
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) {
       final wasOffline = !_isOnline;
       _isOnline = !result.contains(ConnectivityResult.none);
-      
+
       // If we just came online, try to flush
       if (wasOffline && _isOnline) {
         flush();

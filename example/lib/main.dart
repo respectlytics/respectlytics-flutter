@@ -3,13 +3,16 @@ import 'package:respectlytics_flutter/respectlytics_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Configure Respectlytics SDK
   await Respectlytics.configure(apiKey: 'your-api-key-here');
-  
-  // Enable user tracking (optional)
-  await Respectlytics.identify();
-  
+
+  // For self-hosted servers, pass baseUrl:
+  // await Respectlytics.configure(
+  //   apiKey: 'your-api-key-here',
+  //   baseUrl: 'https://your-server.com/api/v1',
+  // );
+
   runApp(const MyApp());
 }
 
@@ -35,8 +38,8 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Track screen view
-    Respectlytics.track('screen_view', screen: 'HomeScreen');
-    
+    Respectlytics.track('home_screen_view');
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -50,7 +53,7 @@ class MyHomePage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                await Respectlytics.track('button_tap', screen: 'HomeScreen');
+                await Respectlytics.track('button_tap');
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Event tracked!')),
@@ -70,18 +73,6 @@ class MyHomePage extends StatelessWidget {
                 }
               },
               child: const Text('Force Flush'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () async {
-                await Respectlytics.reset();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User reset!')),
-                  );
-                }
-              },
-              child: const Text('Reset User'),
             ),
           ],
         ),

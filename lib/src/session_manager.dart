@@ -1,17 +1,16 @@
 // Respectlytics SDK for Flutter
-// Copyright (c) 2025 Respectlytics. All rights reserved.
-// See LICENSE file for terms.
+// Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 import 'package:uuid/uuid.dart';
 
 /// Manages session ID generation and automatic rotation.
-/// 
+///
 /// Sessions are stored in RAM only (never persisted to disk) and:
 /// - Regenerate on every app restart
 /// - Rotate automatically after 2 hours of continuous use
-/// 
-/// This ensures compliance with GDPR and ePrivacy Directive without
-/// requiring user consent.
+///
+/// Session IDs exist only in RAM, making analytics transparent and
+/// defensible by minimizing data on-device.
 class SessionManager {
   /// Session timeout: 2 hours (7200 seconds)
   static const Duration _sessionTimeout = Duration(hours: 2);

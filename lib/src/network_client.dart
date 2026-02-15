@@ -1,6 +1,5 @@
 // Respectlytics SDK for Flutter
-// Copyright (c) 2025 Respectlytics. All rights reserved.
-// See LICENSE file for terms.
+// Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 import 'dart:async';
 import 'dart:convert';
@@ -43,7 +42,7 @@ class NetworkClient {
       : _client = client ?? http.Client();
 
   /// Send a batch of events to the API.
-  /// 
+  ///
   /// Retries on network errors and 5xx responses with exponential backoff.
   /// Throws [NetworkError] on permanent failures.
   Future<void> sendEvents(List<Event> events) async {

@@ -1,6 +1,5 @@
 // Respectlytics SDK for Flutter
-// Copyright (c) 2025 Respectlytics. All rights reserved.
-// See LICENSE file for terms.
+// Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:respectlytics_flutter/src/models/event.dart';

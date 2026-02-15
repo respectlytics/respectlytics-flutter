@@ -1,4 +1,4 @@
-// Integration test for Respectlytics Flutter SDK v2.0.0
+// Integration test for Respectlytics Flutter SDK v2.2.0
 // Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart
 
 import 'dart:convert';
@@ -9,7 +9,7 @@ final String? testApiKey = Platform.environment['RESPECTLYTICS_TEST_API_KEY'];
 const String baseUrl = 'http://127.0.0.1:8080/api/v1';
 
 Future<void> main() async {
-  print('🧪 Respectlytics Flutter SDK v2.0.0 Integration Tests\n');
+  print('🧪 Respectlytics Flutter SDK v2.2.0 Integration Tests\n');
 
   // Check for API key
   if (testApiKey == null || testApiKey!.isEmpty) {
@@ -32,10 +32,6 @@ Future<void> main() async {
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
       'platform': 'iOS',
-      'os_version': '17.1',
-      'app_version': '2.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
     });
     if (result['statusCode'] == 201) {
       print('  ✅ PASSED: Event created (status 201)');
@@ -50,22 +46,17 @@ Future<void> main() async {
     failed++;
   }
 
-  // Test 2: Event with screen parameter
-  print('\nTest 2: Event with screen parameter...');
+  // Test 2: Event from Android platform
+  print('\nTest 2: Event from Android platform...');
   try {
     final result = await sendEvent({
-      'event_name': 'screen_view',
+      'event_name': 'android_test_event',
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'd4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1',
-      'screen': 'HomeScreen',
-      'platform': 'iOS',
-      'os_version': '17.0',
-      'app_version': '2.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
+      'platform': 'Android',
     });
     if (result['statusCode'] == 201) {
-      print('  ✅ PASSED: Event with screen created');
+      print('  ✅ PASSED: Android event created');
       passed++;
     } else {
       print('  ❌ FAILED: Expected 201, got ${result['statusCode']}');
@@ -77,21 +68,17 @@ Future<void> main() async {
     failed++;
   }
 
-  // Test 3: Event from Android platform
-  print('\nTest 3: Event from Android platform...');
+  // Test 3: Event from macOS platform
+  print('\nTest 3: Event from macOS platform...');
   try {
     final result = await sendEvent({
-      'event_name': 'android_test_event',
+      'event_name': 'macos_test_event',
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5',
-      'platform': 'Android',
-      'os_version': '14.0',
-      'app_version': '2.0.0',
-      'locale': 'de_DE',
-      'device_type': 'tablet',
+      'platform': 'macOS',
     });
     if (result['statusCode'] == 201) {
-      print('  ✅ PASSED: Android event created');
+      print('  ✅ PASSED: macOS event created');
       passed++;
     } else {
       print('  ❌ FAILED: Expected 201, got ${result['statusCode']}');
@@ -111,10 +98,6 @@ Future<void> main() async {
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
       'platform': 'iOS',
-      'os_version': '17.0',
-      'app_version': '2.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
     }, apiKey: 'invalid-api-key-12345');
     if (result['statusCode'] == 401) {
       print('  ✅ PASSED: Correctly rejected with 401');
@@ -135,10 +118,6 @@ Future<void> main() async {
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3',
       'platform': 'iOS',
-      'os_version': '17.0',
-      'app_version': '2.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
     });
     if (result['statusCode'] == 400) {
       print('  ✅ PASSED: Correctly rejected with 400');
@@ -161,10 +140,6 @@ Future<void> main() async {
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
       'platform': 'iOS',
-      'os_version': '17.0',
-      'app_version': '2.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
     });
     if (result['statusCode'] == 400) {
       print('  ✅ PASSED: Correctly rejected empty event_name');
@@ -187,10 +162,6 @@ Future<void> main() async {
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'session_id': 'abcdef0123456789abcdef0123456789', // Valid 32 hex chars
       'platform': 'iOS',
-      'os_version': '17.0',
-      'app_version': '2.0.0',
-      'locale': 'en_US',
-      'device_type': 'phone',
     });
     if (result['statusCode'] == 201) {
       print('  ✅ PASSED: Valid session ID format accepted');

@@ -1,6 +1,5 @@
 // Respectlytics SDK for Flutter
-// Copyright (c) 2025 Respectlytics. All rights reserved.
-// See LICENSE file for terms.
+// Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 /// SDK configuration holding API key and endpoint.
 class Configuration {

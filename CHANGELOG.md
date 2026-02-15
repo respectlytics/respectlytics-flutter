@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-02-15
+
+### Added
+- `baseUrl` parameter in `configure()` for self-hosted Respectlytics server support
+- Self-Hosted Server section in README with configuration example
+- "What's New in v2.2.0" section in README
+
+### Changed
+- **License changed from Proprietary to MIT** for broader adoption and self-hosted use
+- Corrected "4 fields" to "5 fields stored" (server stores country derived from IP)
+- Replaced GDPR/ePrivacy compliance claim in SessionManager with technical description
+- Updated copyright headers to reference MIT License
+- Fixed example app to use current v2.x API (removed identify/reset/screen references)
+- Updated integration test to reflect current SDK behavior
+
+---
+
 ## [2.1.0] - 2025-12-26
 
 ### ⚠️ Breaking Changes

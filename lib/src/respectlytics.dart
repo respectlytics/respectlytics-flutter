@@ -1,6 +1,5 @@
 // Respectlytics SDK for Flutter
-// Copyright (c) 2025 Respectlytics. All rights reserved.
-// See LICENSE file for terms.
+// Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 import 'dart:async';
 import 'dart:io';
@@ -14,9 +13,9 @@ import 'models/event.dart';
 ///
 /// All methods are static for easy access throughout your app.
 ///
-/// ## Public API (v2.1.0)
+/// ## Public API (v2.2.0)
 ///
-/// - `configure(apiKey:)` - Initialize SDK (call once at app launch)
+/// - `configure(apiKey:, baseUrl:)` - Initialize SDK (call once at app launch)
 /// - `track(eventName)` - Track an event
 /// - `flush()` - Force send queued events
 ///
@@ -41,22 +40,35 @@ class Respectlytics {
   /// before runApp().
   ///
   /// ```dart
+  /// // Cloud (default)
   /// await Respectlytics.configure(apiKey: 'your-api-key');
+  ///
+  /// // Self-hosted server
+  /// await Respectlytics.configure(
+  ///   apiKey: 'your-api-key',
+  ///   baseUrl: 'https://your-server.com/api/v1',
+  /// );
   /// ```
-  static Future<void> configure({required String apiKey}) async {
+  static Future<void> configure({
+    required String apiKey,
+    String? baseUrl,
+  }) async {
     if (apiKey.isEmpty) {
       print('[Respectlytics] ⚠️ API key cannot be empty');
       return;
     }
 
-    _configuration = Configuration(apiKey: apiKey);
+    _configuration = Configuration(
+      apiKey: apiKey,
+      baseUrl: baseUrl ?? 'https://respectlytics.com/api/v1',
+    );
     _sessionManager = SessionManager();
     _eventQueue = EventQueue(configuration: _configuration!);
     _platform = _detectPlatform();
 
     await _eventQueue!.load();
 
-    print('[Respectlytics] ✓ SDK configured (v2.1.0)');
+    print('[Respectlytics] ✓ SDK configured (v2.2.0)');
   }
 
   /// Detect the current platform.
@@ -72,7 +84,8 @@ class Respectlytics {
   /// Track an event.
   ///
   /// Custom properties are NOT supported - this is by design for privacy.
-  /// The API uses a strict 4-field allowlist.
+  /// The server stores only 5 fields: event_name, timestamp, session_id,
+  /// platform, and country (derived server-side from IP).
   ///
   /// ```dart
   /// await Respectlytics.track('purchase');

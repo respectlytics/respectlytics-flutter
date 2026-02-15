@@ -20,8 +20,8 @@ class SessionManager {
   DateTime _sessionStart;
 
   SessionManager()
-      : _sessionId = _generateSessionId(),
-        _sessionStart = DateTime.now();
+    : _sessionId = _generateSessionId(),
+      _sessionStart = DateTime.now();
 
   /// Get the current session ID, rotating if 2 hours have elapsed.
   String getSessionId() {

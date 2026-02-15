@@ -93,7 +93,9 @@ class Respectlytics {
   /// ```
   static Future<void> track(String eventName) async {
     if (_configuration == null) {
-      print('[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.');
+      print(
+        '[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.',
+      );
       return;
     }
 
@@ -127,7 +129,9 @@ class Respectlytics {
   /// ```
   static Future<void> flush() async {
     if (_configuration == null) {
-      print('[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.');
+      print(
+        '[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.',
+      );
       return;
     }
 

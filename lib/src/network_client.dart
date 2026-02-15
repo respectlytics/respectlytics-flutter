@@ -27,7 +27,8 @@ class NetworkError implements Exception {
   NetworkError(this.type, {this.message, this.statusCode});
 
   @override
-  String toString() => 'NetworkError: $type${message != null ? ' - $message' : ''}';
+  String toString() =>
+      'NetworkError: $type${message != null ? ' - $message' : ''}';
 }
 
 /// HTTP client for sending events to the Respectlytics API.
@@ -39,7 +40,7 @@ class NetworkClient {
   final http.Client _client;
 
   NetworkClient({required this.configuration, http.Client? client})
-      : _client = client ?? http.Client();
+    : _client = client ?? http.Client();
 
   /// Send a batch of events to the API.
   ///
@@ -66,12 +67,24 @@ class NetworkClient {
 
       _handleResponse(response);
     } on TimeoutException {
-      await _retryOrThrow(event, attempt, NetworkError(NetworkErrorType.networkError, message: 'Request timed out'));
+      await _retryOrThrow(
+        event,
+        attempt,
+        NetworkError(
+          NetworkErrorType.networkError,
+          message: 'Request timed out',
+        ),
+      );
     } on http.ClientException catch (e) {
-      await _retryOrThrow(event, attempt, NetworkError(NetworkErrorType.networkError, message: e.message));
+      await _retryOrThrow(
+        event,
+        attempt,
+        NetworkError(NetworkErrorType.networkError, message: e.message),
+      );
     } on NetworkError catch (e) {
       // Check if this error type should be retried
-      if (e.type == NetworkErrorType.serverError || e.type == NetworkErrorType.rateLimited) {
+      if (e.type == NetworkErrorType.serverError ||
+          e.type == NetworkErrorType.rateLimited) {
         await _retryOrThrow(event, attempt, e);
       } else {
         rethrow;
@@ -79,7 +92,11 @@ class NetworkClient {
     }
   }
 
-  Future<void> _retryOrThrow(Event event, int attempt, NetworkError error) async {
+  Future<void> _retryOrThrow(
+    Event event,
+    int attempt,
+    NetworkError error,
+  ) async {
     if (attempt < _maxRetries) {
       // Exponential backoff: 2^attempt seconds
       final delay = Duration(seconds: 1 << attempt); // 2, 4, 8 seconds
@@ -97,16 +114,26 @@ class NetworkClient {
 
     switch (response.statusCode) {
       case 400:
-        throw NetworkError(NetworkErrorType.badRequest, statusCode: 400, message: response.body);
+        throw NetworkError(
+          NetworkErrorType.badRequest,
+          statusCode: 400,
+          message: response.body,
+        );
       case 401:
         throw NetworkError(NetworkErrorType.unauthorized, statusCode: 401);
       case 429:
         throw NetworkError(NetworkErrorType.rateLimited, statusCode: 429);
       default:
         if (response.statusCode >= 500) {
-          throw NetworkError(NetworkErrorType.serverError, statusCode: response.statusCode);
+          throw NetworkError(
+            NetworkErrorType.serverError,
+            statusCode: response.statusCode,
+          );
         }
-        throw NetworkError(NetworkErrorType.invalidResponse, statusCode: response.statusCode);
+        throw NetworkError(
+          NetworkErrorType.invalidResponse,
+          statusCode: response.statusCode,
+        );
     }
   }
 

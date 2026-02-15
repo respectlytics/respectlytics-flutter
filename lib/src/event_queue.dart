@@ -31,7 +31,8 @@ class EventQueue with WidgetsBindingObserver {
   bool _isFlushing = false;
 
   EventQueue({required this.configuration, NetworkClient? networkClient})
-      : _networkClient = networkClient ?? NetworkClient(configuration: configuration) {
+    : _networkClient =
+          networkClient ?? NetworkClient(configuration: configuration) {
     // Observe app lifecycle for background flush
     WidgetsBinding.instance.addObserver(this);
 
@@ -50,7 +51,9 @@ class EventQueue with WidgetsBindingObserver {
     if (jsonString != null) {
       try {
         final jsonList = jsonDecode(jsonString) as List;
-        _events.addAll(jsonList.map((e) => Event.fromJson(e as Map<String, dynamic>)));
+        _events.addAll(
+          jsonList.map((e) => Event.fromJson(e as Map<String, dynamic>)),
+        );
       } catch (e) {
         // If corrupted, start fresh
         print('[Respectlytics] Warning: Could not load persisted queue');
@@ -113,7 +116,9 @@ class EventQueue with WidgetsBindingObserver {
   }
 
   void _setupConnectivityMonitor() {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      result,
+    ) {
       final wasOffline = !_isOnline;
       _isOnline = !result.contains(ConnectivityResult.none);
 

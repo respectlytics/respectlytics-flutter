@@ -14,7 +14,9 @@ Future<void> main() async {
   // Check for API key
   if (testApiKey == null || testApiKey!.isEmpty) {
     print('⚠️  RESPECTLYTICS_TEST_API_KEY environment variable not set');
-    print('   Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart');
+    print(
+      '   Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart',
+    );
     exit(1);
   }
 

@@ -2,24 +2,27 @@
 // Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'configuration.dart';
 import 'models/event.dart';
 import 'network_client.dart';
 
-/// Manages event queue, persistence, and automatic flushing.
+/// Manages event batching and automatic flushing.
 ///
-/// CRITICAL: Events are IMMEDIATELY persisted on every add() call.
-/// This ensures events survive force-quit, crashes, and app termination.
+/// Event queue is RAM-only by design. No data is written to device storage
+/// (no SharedPreferences, no files, no databases) for analytics purposes.
+/// If the app is force-quit before the next flush, unsent events are lost.
+/// This is a deliberate privacy-first design choice — zero bytes are written
+/// to the user's device for analytics purposes.
+///
+/// The SDK auto-flushes every 30 seconds, on 10 queued events, and when the
+/// app enters background, so the loss window is narrow.
 class EventQueue with WidgetsBindingObserver {
   static const int _maxQueueSize = 10;
   static const Duration _flushInterval = Duration(seconds: 30);
-  static const String _persistenceKey = 'com.respectlytics.eventQueue';
 
   final Configuration configuration;
   final List<Event> _events = [];
@@ -43,37 +46,13 @@ class EventQueue with WidgetsBindingObserver {
     _startFlushTimer();
   }
 
-  /// Load persisted queue on SDK init.
-  Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_persistenceKey);
-
-    if (jsonString != null) {
-      try {
-        final jsonList = jsonDecode(jsonString) as List;
-        _events.addAll(
-          jsonList.map((e) => Event.fromJson(e as Map<String, dynamic>)),
-        );
-      } catch (e) {
-        // If corrupted, start fresh
-        print('[Respectlytics] Warning: Could not load persisted queue');
-      }
-    }
-  }
-
-  /// Add event to queue with IMMEDIATE persistence.
-  ///
-  /// Events are persisted BEFORE any network operations to ensure
-  /// they survive force-quit, crashes, and app termination.
-  Future<void> add(Event event) async {
+  /// Add an event to the in-memory queue.
+  void add(Event event) {
     _events.add(event);
-
-    // CRITICAL: Persist immediately before any async operations
-    await _persistQueue();
 
     // Check if we should flush
     if (_events.length >= _maxQueueSize) {
-      await flush();
+      flush();
     }
   }
 
@@ -88,30 +67,17 @@ class EventQueue with WidgetsBindingObserver {
     // Take a copy of events to send
     final eventsToSend = List<Event>.from(_events);
 
-    // Clear queue and persist (events will be re-added on failure)
+    // Clear queue (events will be re-added on failure)
     _events.clear();
-    await _persistQueue();
 
     try {
       await _networkClient.sendEvents(eventsToSend);
     } catch (e) {
       // Re-add failed events to front of queue
       _events.insertAll(0, eventsToSend);
-      await _persistQueue();
       print('[Respectlytics] Failed to send events, will retry later');
     } finally {
       _isFlushing = false;
-    }
-  }
-
-  /// Persist queue to SharedPreferences.
-  Future<void> _persistQueue() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (_events.isEmpty) {
-      await prefs.remove(_persistenceKey);
-    } else {
-      final jsonString = jsonEncode(_events.map((e) => e.toJson()).toList());
-      await prefs.setString(_persistenceKey, jsonString);
     }
   }
 

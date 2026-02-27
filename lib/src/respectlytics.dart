@@ -13,7 +13,7 @@ import 'models/event.dart';
 ///
 /// All methods are static for easy access throughout your app.
 ///
-/// ## Public API (v2.2.0)
+/// ## Public API (v3.0.0)
 ///
 /// - `configure(apiKey:, baseUrl:)` - Initialize SDK (call once at app launch)
 /// - `track(eventName)` - Track an event
@@ -66,9 +66,7 @@ class Respectlytics {
     _eventQueue = EventQueue(configuration: _configuration!);
     _platform = _detectPlatform();
 
-    await _eventQueue!.load();
-
-    print('[Respectlytics] ✓ SDK configured (v2.2.0)');
+    print('[Respectlytics] ✓ SDK configured (v3.0.0)');
   }
 
   /// Detect the current platform.
@@ -116,7 +114,7 @@ class Respectlytics {
       platform: _platform,
     );
 
-    await _eventQueue!.add(event);
+    _eventQueue!.add(event);
   }
 
   /// Force send queued events.

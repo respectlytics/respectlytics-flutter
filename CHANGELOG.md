@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2026-02-27
+
+### ⚠️ Breaking Changes
+- **REMOVED**: SharedPreferences persistence for event queue
+- **REMOVED**: `shared_preferences` dependency
+- **CHANGED**: `EventQueue.add()` is now synchronous (no longer returns Future)
+
+### Changed
+- Event queue is now RAM-only — zero bytes written to device for analytics
+- Unsent events are lost on force-quit (deliberate privacy trade-off)
+- `EventQueue.load()` method removed (no persistence to load from)
+- Updated all documentation to reflect RAM-only architecture
+
+### Why?
+The v2.x event queue persisted events to SharedPreferences, contradicting Respectlytics' privacy promise of "zero device storage for analytics." v3.0.0 removes all disk persistence to align code with documentation. The ~1-3% event loss from force-quits has no meaningful impact on session-based aggregate analytics.
+
+### Migration
+Update your dependency version in `pubspec.yaml`:
+```yaml
+respectlytics_flutter: ^3.0.0
+```
+**No code changes required.** The public API (`configure`, `track`, `flush`) is unchanged.
+
+---
+
 ## [2.2.0] - 2026-02-15
 
 ### Added

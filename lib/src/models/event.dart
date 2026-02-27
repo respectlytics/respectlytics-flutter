@@ -33,7 +33,7 @@ class Event {
     };
   }
 
-  /// Create from JSON map (for queue persistence).
+  /// Create from JSON map.
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
       eventName: json['event_name'] as String,

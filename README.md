@@ -1,16 +1,16 @@
 # Respectlytics Flutter SDK
 
-Official Respectlytics SDK for Flutter. Privacy-first analytics with automatic session management, offline support, and zero device identifier collection.
+Official Respectlytics SDK for Flutter. Privacy-first analytics with automatic session management, zero device storage, and no device identifier collection.
 
 [![pub version](https://img.shields.io/pub/v/respectlytics_flutter.svg)](https://pub.dev/packages/respectlytics_flutter)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](https://pub.dev/packages/respectlytics_flutter)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## What's New in v2.2.0
+## What's New in v3.0.0
 
-- **MIT License** — SDK is now open source under the MIT License for maximum adoption
-- **Self-Hosted Support** — New `baseUrl` parameter in `configure()` lets you point at your own Respectlytics server
-- **Privacy Wording** — Removed regulatory compliance claims; SDK documentation now describes technical facts only
+- **RAM-Only Event Queue** — Events are no longer persisted to SharedPreferences. The entire SDK now writes zero bytes to the device for analytics
+- **Zero Device Storage** — Session IDs AND event queue are held exclusively in RAM
+- **Removed `shared_preferences` dependency** — One fewer dependency to audit
 
 ## Installation
 
@@ -18,7 +18,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  respectlytics_flutter: ^2.2.0
+  respectlytics_flutter: ^3.0.0
 ```
 
 Or run:
@@ -87,7 +87,7 @@ Session IDs are managed entirely by the SDK - no configuration needed.
 **Key points:**
 - 🔄 New session on every app launch
 - ⏱️ Sessions rotate after 2 hours of continuous use
-- 💾 Session IDs stored in RAM only (never persisted to disk)
+- 🧠 Session IDs stored in RAM only (never persisted to disk)
 - 🚫 No cross-session tracking - each session is independent
 
 ## 🛡️ Privacy by Design
@@ -117,6 +117,7 @@ Respectlytics helps developers **avoid collecting personal data** in the first p
 ### Privacy Architecture
 
 - **RAM-only sessions**: Session IDs exist only in device memory, never written to disk
+- **RAM-only event queue**: Events are held in memory until flushed to the server — zero device storage
 - **2-hour rotation**: Sessions automatically expire and regenerate
 - **New session on restart**: Each app launch starts a fresh session
 - **Server-side hashing**: Session IDs are hashed with daily-rotating salt before storage
@@ -129,13 +130,14 @@ Consult your legal team to determine your specific compliance requirements.
 
 ## Event Queue Behavior
 
-Events are queued and sent automatically:
+Events are queued in memory and sent automatically:
 - Every 30 seconds
 - When 10 events are queued
 - When app goes to background
 - When `flush()` is called
+- When the device comes back online
 
-**Events are NEVER lost**: They are persisted to SharedPreferences immediately on every `track()` call, surviving force-quit, crashes, and app termination.
+**Unsent events are lost on force-quit** — this is a deliberate privacy trade-off. The SDK writes zero bytes to the device for analytics purposes. The ~1-3% event loss from force-quits has no meaningful impact on session-based aggregate analytics.
 
 ## Platform Support
 
@@ -154,6 +156,27 @@ Events are queued and sent automatically:
 - Dart 3.0+
 
 ## Migration Guide
+
+### From v2.x to v3.0.0
+
+**Breaking Change:** Event queue no longer persists to SharedPreferences.
+
+Update your dependency version:
+
+```yaml
+# Before
+respectlytics_flutter: ^2.2.0
+
+# After
+respectlytics_flutter: ^3.0.0
+```
+
+**No code changes required.** The public API (`configure`, `track`, `flush`) is unchanged. Events previously stored in SharedPreferences under the old key will be ignored (they remain inert but are never read).
+
+**What changed:**
+- Events are now held in an in-memory list (RAM-only)
+- Unsent events are lost on force-quit — this is by design
+- `shared_preferences` is no longer a dependency
 
 ### From v2.0.x to v2.1.0
 

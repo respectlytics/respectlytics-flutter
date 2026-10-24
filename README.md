@@ -13,9 +13,9 @@ Official Respectlytics SDK for Flutter. Privacy-first analytics with automatic s
 
 ## What's New in v3.0.0
 
-- **RAM-Only Event Queue** — Events are no longer persisted to SharedPreferences. The entire SDK now writes zero bytes to the device for analytics
-- **Zero Device Storage** — Session IDs AND event queue are held exclusively in RAM
-- **Removed `shared_preferences` dependency** — One fewer dependency to audit
+- **RAM-Only Event Queue**: events are no longer persisted to SharedPreferences. The entire SDK now writes zero bytes to the device for analytics
+- **Zero Device Storage**: session IDs and the event queue are held exclusively in RAM
+- **Removed `shared_preferences` dependency**: one fewer dependency to audit
 
 ## Installation
 
@@ -56,8 +56,8 @@ await Respectlytics.track('purchase');
 ### `configure(apiKey:, baseUrl:)`
 Initialize the SDK. Call once in your `main()` before `runApp()`.
 
-- `apiKey` (required) — Your Respectlytics API key
-- `baseUrl` (optional) — Server URL. Defaults to `https://respectlytics.com/api/v1`
+- `apiKey` (required): your Respectlytics API key
+- `baseUrl` (optional): the server URL. Defaults to `https://respectlytics.com/api/v1`
 
 ### `track(eventName, [properties])`
 Track an event.
@@ -138,7 +138,7 @@ Session IDs are managed entirely by the SDK - no configuration needed.
 
 ## 🛡️ Privacy by Design
 
-Respectlytics helps developers **avoid collecting personal data** in the first place. Our motto is **Return of Avoidance (ROA)** — the best way to protect sensitive data is to never collect it.
+Respectlytics helps developers **avoid collecting personal data** in the first place. Our motto is **Return of Avoidance (ROA)**: the best way to protect sensitive data is to never collect it.
 
 ### What We Store (5 fields, plus declared properties on paid plans)
 
@@ -164,7 +164,7 @@ Respectlytics helps developers **avoid collecting personal data** in the first p
 ### Privacy Architecture
 
 - **RAM-only sessions**: Session IDs exist only in device memory, never written to disk
-- **RAM-only event queue**: Events are held in memory until flushed to the server — zero device storage
+- **RAM-only event queue**: Events are held in memory until flushed to the server, with zero device storage
 - **2-hour rotation**: Sessions automatically expire and regenerate
 - **New session on restart**: Each app launch starts a fresh session
 - **Server-side hashing**: Session IDs are hashed with daily-rotating salt before storage
@@ -188,7 +188,7 @@ An event the server refuses as invalid (400) is dropped, so it never holds up th
 Once the server has confirmed an event, the SDK does not send it again.
 If the server refuses the app key (401), the SDK drops the queued events and sends nothing more until the app starts again, so a wrong or revoked key does not keep sending refused requests from your users' devices.
 
-**Unsent events are lost on force-quit** — this is a deliberate privacy trade-off. The SDK writes zero bytes to the device for analytics purposes. The ~1-3% event loss from force-quits has no meaningful impact on session-based aggregate analytics.
+**Unsent events are lost on force-quit.** This is a deliberate privacy trade-off: the SDK writes zero bytes to the device for analytics, so the events of a session the user force-quits before they are sent are not counted.
 
 ## Platform Support
 
@@ -232,7 +232,7 @@ respectlytics_flutter: ^3.0.0
 
 **What changed:**
 - Events are now held in an in-memory list (RAM-only)
-- Unsent events are lost on force-quit — this is by design
+- Unsent events are lost on force-quit, by design
 - `shared_preferences` is no longer a dependency
 
 ### From v2.0.x to v2.1.0
@@ -260,7 +260,7 @@ If you need screen context, include it in your event name (e.g., `checkout_scree
 
 ## Getting Help
 
-- 📖 [SDK Documentation](https://respectlytics.com/sdk/)
+- 📖 [SDK Documentation](https://respectlytics.com/sdk/?ref=respectlytics-github)
 - 🐛 [Issue Tracker](https://github.com/respectlytics/respectlytics-flutter/issues)
 - 💬 [Support](mailto:respectlytics@loheden.com)
 

@@ -1,5 +1,5 @@
-// Integration test for Respectlytics Flutter SDK v2.2.0
-// Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart
+// Integration test for Respectlytics Flutter SDK v3.1.0
+// Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart integration_test.dart
 
 import 'dart:convert';
 import 'dart:io';
@@ -9,13 +9,13 @@ final String? testApiKey = Platform.environment['RESPECTLYTICS_TEST_API_KEY'];
 const String baseUrl = 'http://127.0.0.1:8080/api/v1';
 
 Future<void> main() async {
-  print('🧪 Respectlytics Flutter SDK v2.2.0 Integration Tests\n');
+  print('🧪 Respectlytics Flutter SDK v3.1.0 Integration Tests\n');
 
   // Check for API key
   if (testApiKey == null || testApiKey!.isEmpty) {
     print('⚠️  RESPECTLYTICS_TEST_API_KEY environment variable not set');
     print(
-      '   Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart test/integration_test.dart',
+      '   Run with: RESPECTLYTICS_TEST_API_KEY=your-key dart integration_test.dart',
     );
     exit(1);
   }
@@ -171,6 +171,39 @@ Future<void> main() async {
     } else {
       print('  ❌ FAILED: Expected 201, got ${result['statusCode']}');
       print('     Response: ${result['body']}');
+      failed++;
+    }
+  } catch (e) {
+    print('  ❌ FAILED: $e');
+    failed++;
+  }
+
+  // Test 8: Event with properties (v3.1.0). The event is always kept; the
+  // answer names what was kept and what was ignored (all of them unless the
+  // app declared them on a paid plan).
+  print('\nTest 8: Event with properties...');
+  try {
+    final result = await sendEvent({
+      'event_name': 'paywall_viewed',
+      'timestamp': DateTime.now().toUtc().toIso8601String(),
+      'session_id': 'c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6',
+      'platform': 'iOS',
+      'properties': {'paywall': 'b', 'price': 7.5},
+    });
+    final body = result['statusCode'] == 201
+        ? jsonDecode(result['body'] as String) as Map<String, dynamic>
+        : const <String, dynamic>{};
+    if (body.containsKey('properties') &&
+        body.containsKey('ignored_properties')) {
+      print(
+        '  ✅ PASSED: Event created, kept ${body['properties']}, '
+        'ignored ${body['ignored_properties']}',
+      );
+      passed++;
+    } else {
+      print('  ❌ FAILED: Expected 201 naming kept and ignored properties');
+      print(
+          '     Status: ${result['statusCode']}, response: ${result['body']}');
       failed++;
     }
   } catch (e) {

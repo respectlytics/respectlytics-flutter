@@ -4,8 +4,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 import 'configuration.dart';
 import 'event_queue.dart';
+import 'properties.dart';
 import 'session_manager.dart';
 import 'models/event.dart';
 
@@ -13,10 +16,11 @@ import 'models/event.dart';
 ///
 /// All methods are static for easy access throughout your app.
 ///
-/// ## Public API (v3.0.0)
+/// ## Public API (v3.1.0)
 ///
 /// - `configure(apiKey:, baseUrl:)` - Initialize SDK (call once at app launch)
-/// - `track(eventName)` - Track an event
+/// - `track(eventName, [properties])` - Track an event, optionally with
+///   properties
 /// - `flush()` - Force send queued events
 ///
 /// ## Session Management
@@ -66,7 +70,7 @@ class Respectlytics {
     _eventQueue = EventQueue(configuration: _configuration!);
     _platform = _detectPlatform();
 
-    print('[Respectlytics] ✓ SDK configured (v3.0.0)');
+    print('[Respectlytics] ✓ SDK configured (v3.1.0)');
   }
 
   /// Detect the current platform.
@@ -81,15 +85,40 @@ class Respectlytics {
 
   /// Track an event.
   ///
-  /// Custom properties are NOT supported - this is by design for privacy.
-  /// The server stores only 5 fields: event_name, timestamp, session_id,
-  /// platform, and country (derived server-side from IP).
+  /// The server stores 5 fields for every event: event_name, timestamp,
+  /// session_id, platform, and country (derived server-side from IP).
+  ///
+  /// [properties] are optional. On a paid plan the server keeps a property
+  /// once it is declared in the app's Settings on respectlytics.com: a list of
+  /// values, or a number, which is kept only as its band (such as "5 to 10").
+  /// Everything else is dropped. The SDK drops on the device anything the
+  /// server could never keep, so text such as an email address, a URL or
+  /// anything longer than 40 characters never leaves the device:
+  ///
+  /// - a name that is not lowercase letters, digits and `_`, starting with a
+  ///   letter, at most 40 characters
+  /// - a text value that is not 1 to 40 letters, digits, spaces, `_`, `.` or
+  ///   `-`, starting with a letter or digit
+  /// - a number that is NaN or infinite
+  /// - any value that is not a String, a number or a bool
+  /// - every property after the first 20 that pass
+  ///
+  /// A short value that fits these rules (such as "John Smith") is sent, and
+  /// the server drops it unless it was declared.
+  ///
+  /// A dropped property never stops the event: it is sent with what passed.
+  /// In debug builds the SDK prints which names were dropped and why, never
+  /// their values.
   ///
   /// ```dart
   /// await Respectlytics.track('purchase');
-  /// await Respectlytics.track('button_tap');
+  /// await Respectlytics.track('paywall_viewed', {'paywall': 'b'});
+  /// await Respectlytics.track('plan_chosen', {'price': 7.5});
   /// ```
-  static Future<void> track(String eventName) async {
+  static Future<void> track(
+    String eventName, [
+    Map<String, Object?>? properties,
+  ]) async {
     if (_configuration == null) {
       print(
         '[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.',
@@ -107,14 +136,42 @@ class Respectlytics {
       return;
     }
 
+    final filtered = _filterProperties(eventName, properties);
+
     final event = Event(
       eventName: eventName,
       timestamp: DateTime.now().toUtc().toIso8601String(),
       sessionId: _sessionManager!.getSessionId(),
       platform: _platform,
+      properties: filtered.kept,
     );
 
     _eventQueue!.add(event);
+  }
+
+  /// Filter [properties] for [eventName], saying in debug builds what was
+  /// dropped. Never throws: if the map cannot be read at all, the event is
+  /// sent without properties.
+  static FilteredProperties _filterProperties(
+    String eventName,
+    Map<String, Object?>? properties,
+  ) {
+    try {
+      final filtered = PropertyFilter.filter(properties);
+      if (kDebugMode) {
+        final message = PropertyFilter.describeDropped(eventName, filtered);
+        if (message != null) print(message);
+      }
+      return filtered;
+    } catch (_) {
+      if (kDebugMode) {
+        print(
+          '[Respectlytics] ⚠️ "$eventName": properties could not be read, '
+          'event sent without them',
+        );
+      }
+      return FilteredProperties.none;
+    }
   }
 
   /// Force send queued events.

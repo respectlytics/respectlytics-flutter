@@ -17,5 +17,10 @@ void main() {
       await Respectlytics.track(longName);
       // This test verifies the method doesn't crash
     });
+
+    test('track with properties before configure does not throw', () async {
+      await Respectlytics.track('paywall_viewed', {'paywall': 'b'});
+      // This test verifies the method doesn't crash
+    });
   });
 }

@@ -65,6 +65,26 @@ class MyHomePage extends StatelessWidget {
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
+                // Properties are kept on paid plans once declared in the
+                // app's Settings on respectlytics.com: a list of values (here
+                // the A/B test variant) or a number, kept as a band.
+                await Respectlytics.track('paywall_viewed', {
+                  'paywall': 'b',
+                  'price': 7.5,
+                });
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Event with properties tracked!'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Track Event with Properties'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () async {
                 await Respectlytics.flush();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

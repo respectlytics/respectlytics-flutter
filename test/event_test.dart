@@ -1,6 +1,8 @@
 // Respectlytics SDK for Flutter
 // Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:respectlytics_flutter/src/models/event.dart';
 
@@ -126,6 +128,72 @@ void main() {
 
       expect(iosEvent.toJson()['platform'], equals('iOS'));
       expect(androidEvent.toJson()['platform'], equals('Android'));
+    });
+  });
+
+  group('Event properties', () {
+    Event build({Map<String, Object> properties = const {}}) => Event(
+          eventName: 'paywall_viewed',
+          timestamp: '2026-10-24T10:00:00Z',
+          sessionId: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
+          platform: 'iOS',
+          properties: properties,
+        );
+
+    test('an event without properties has no properties key at all', () {
+      final event = build();
+
+      expect(event.properties, isEmpty);
+      expect(event.toJson().containsKey('properties'), isFalse);
+      expect(jsonDecode(jsonEncode(event.toJson())), {
+        'event_name': 'paywall_viewed',
+        'timestamp': '2026-10-24T10:00:00Z',
+        'session_id': 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
+        'platform': 'iOS',
+      });
+    });
+
+    test('an event with properties sends them as a JSON object', () {
+      final event = build(
+        properties: {'paywall': 'b', 'price': 7.5, 'items': 3, 'trial': true},
+      );
+
+      final body = jsonDecode(jsonEncode(event.toJson()));
+      expect(body.length, equals(5));
+      expect(body['properties'], {
+        'paywall': 'b',
+        'price': 7.5,
+        'items': 3,
+        'trial': true,
+      });
+    });
+
+    test('properties are copied when the event is made', () {
+      final properties = <String, Object>{'paywall': 'b'};
+      final event = build(properties: properties);
+
+      properties['paywall'] = 'c';
+      properties['extra'] = 'd';
+
+      expect(event.properties, {'paywall': 'b'});
+      expect(() => event.properties['x'] = 'y', throwsUnsupportedError);
+    });
+
+    test('round-trip JSON keeps properties', () {
+      final original = build(properties: {'paywall': 'b', 'price': 7.5});
+
+      final restored = Event.fromJson(
+        jsonDecode(jsonEncode(original.toJson())) as Map<String, dynamic>,
+      );
+
+      expect(restored.properties, {'paywall': 'b', 'price': 7.5});
+    });
+
+    test('fromJson without properties gives none', () {
+      final restored = Event.fromJson(build().toJson());
+
+      expect(restored.properties, isEmpty);
+      expect(restored.toJson().containsKey('properties'), isFalse);
     });
   });
 }

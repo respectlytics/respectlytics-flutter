@@ -1,4 +1,4 @@
-/// Official Respectlytics SDK for Flutter (v3.1.0)
+/// Official Respectlytics SDK for Flutter (v3.1.1)
 ///
 /// Privacy-first analytics with no device identifiers.
 /// Session-based analytics - no persistent user tracking.

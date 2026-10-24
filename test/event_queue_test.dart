@@ -1,6 +1,7 @@
 // Respectlytics SDK for Flutter
 // Copyright (c) 2025 Respectlytics. Licensed under the MIT License.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -13,12 +14,12 @@ import 'package:respectlytics_flutter/src/models/event.dart';
 import 'package:respectlytics_flutter/src/network_client.dart';
 
 Event _event(String name, {Map<String, Object> properties = const {}}) => Event(
-      eventName: name,
-      timestamp: '2026-10-24T10:00:00Z',
-      sessionId: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
-      platform: 'iOS',
-      properties: properties,
-    );
+  eventName: name,
+  timestamp: '2026-10-24T10:00:00Z',
+  sessionId: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
+  platform: 'iOS',
+  properties: properties,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -31,9 +32,9 @@ void main() {
     // The event queue listens for connectivity; no plugin runs in unit tests.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockStreamHandler(
-      const EventChannel('dev.fluttercommunity.plus/connectivity_status'),
-      MockStreamHandler.inline(onListen: (arguments, events) {}),
-    );
+          const EventChannel('dev.fluttercommunity.plus/connectivity_status'),
+          MockStreamHandler.inline(onListen: (arguments, events) {}),
+        );
 
     requests = [];
     answer = (_) => 201;
@@ -61,7 +62,7 @@ void main() {
     queue.add(_event('e2'));
     queue.add(_event('e3'));
 
-    answer = (body) => body['event_name'] == 'e2' ? 401 : 201;
+    answer = (body) => body['event_name'] == 'e2' ? 402 : 201;
     await queue.flush();
     expect(names(), ['e1', 'e2']);
 
@@ -126,5 +127,36 @@ void main() {
     answer = (_) => 400;
     await queue.flush();
     expect(names(), ['bad']);
+  });
+
+  test('a 401 sends exactly one request, then nothing more', () async {
+    final logs = <String>[];
+    await runZoned(
+      () async {
+        queue.add(_event('e1'));
+        queue.add(_event('e2'));
+        queue.add(_event('e3'));
+
+        answer = (_) => 401;
+        await queue.flush();
+        expect(names(), ['e1']);
+        expect(queue.isStopped, isTrue);
+
+        answer = (_) => 201;
+        await queue.flush();
+        queue.add(_event('e4'));
+        await queue.flush();
+        expect(names(), ['e1']);
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (self, parent, zone, line) => logs.add(line),
+      ),
+    );
+
+    expect(logs.where((line) => line.contains('401')).toList(), [
+      '[Respectlytics] The app key was refused (401). Check it in your '
+          "app's Settings on respectlytics.com. No events are sent until the "
+          'app starts again.',
+    ]);
   });
 }

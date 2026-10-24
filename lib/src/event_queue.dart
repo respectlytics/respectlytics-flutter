@@ -32,6 +32,13 @@ class EventQueue with WidgetsBindingObserver {
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _isOnline = true;
   bool _isFlushing = false;
+  bool _isStopped = false;
+
+  /// Whether the server refused the app key (401). Nothing is queued or sent
+  /// from then on: no retry can fix a wrong or revoked key, and every refused
+  /// request counts toward the server's block of the device's address. A new
+  /// `configure` makes a new queue.
+  bool get isStopped => _isStopped;
 
   EventQueue({required this.configuration, NetworkClient? networkClient})
     : _networkClient =
@@ -48,6 +55,8 @@ class EventQueue with WidgetsBindingObserver {
 
   /// Add an event to the in-memory queue.
   void add(Event event) {
+    if (_isStopped) return;
+
     _events.add(event);
 
     // Check if we should flush
@@ -58,7 +67,7 @@ class EventQueue with WidgetsBindingObserver {
 
   /// Force send all queued events.
   Future<void> flush() async {
-    if (_isFlushing || _events.isEmpty || !_isOnline) {
+    if (_isStopped || _isFlushing || _events.isEmpty || !_isOnline) {
       return;
     }
 
@@ -77,13 +86,29 @@ class EventQueue with WidgetsBindingObserver {
         sent++;
       }
     } catch (e) {
-      // Re-add only the events not yet sent to the front of the queue, so an
-      // event the server already accepted is never sent twice
-      _events.insertAll(0, eventsToSend.skip(sent));
-      print('[Respectlytics] Failed to send events, will retry later');
+      if (e is NetworkError && e.type == NetworkErrorType.unauthorized) {
+        _stop();
+      } else {
+        // Re-add only the events not yet sent to the front of the queue, so
+        // an event the server already accepted is never sent twice
+        _events.insertAll(0, eventsToSend.skip(sent));
+        print('[Respectlytics] Failed to send events, will retry later');
+      }
     } finally {
       _isFlushing = false;
     }
+  }
+
+  /// Stop for the rest of the app's run after a 401, dropping what is queued.
+  void _stop() {
+    _isStopped = true;
+    _events.clear();
+    _flushTimer?.cancel();
+    print(
+      '[Respectlytics] The app key was refused (401). Check it in your app\'s '
+      'Settings on respectlytics.com. No events are sent until the app starts '
+      'again.',
+    );
   }
 
   void _setupConnectivityMonitor() {

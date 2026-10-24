@@ -70,7 +70,7 @@ class Respectlytics {
     _eventQueue = EventQueue(configuration: _configuration!);
     _platform = _detectPlatform();
 
-    print('[Respectlytics] ✓ SDK configured (v3.1.0)');
+    print('[Respectlytics] ✓ SDK configured (v3.1.1)');
   }
 
   /// Detect the current platform.
@@ -123,6 +123,11 @@ class Respectlytics {
       print(
         '[Respectlytics] ⚠️ SDK not configured. Call configure(apiKey:) first.',
       );
+      return;
+    }
+
+    // The server refused the app key: nothing is sent until configure again
+    if (_eventQueue!.isStopped) {
       return;
     }
 

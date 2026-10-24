@@ -67,14 +67,19 @@ class EventQueue with WidgetsBindingObserver {
     // Take a copy of events to send
     final eventsToSend = List<Event>.from(_events);
 
-    // Clear queue (events will be re-added on failure)
+    // Clear queue (unsent events will be re-added on failure)
     _events.clear();
 
+    var sent = 0;
     try {
-      await _networkClient.sendEvents(eventsToSend);
+      for (final event in eventsToSend) {
+        await _networkClient.sendEvent(event);
+        sent++;
+      }
     } catch (e) {
-      // Re-add failed events to front of queue
-      _events.insertAll(0, eventsToSend);
+      // Re-add only the events not yet sent to the front of the queue, so an
+      // event the server already accepted is never sent twice
+      _events.insertAll(0, eventsToSend.skip(sent));
       print('[Respectlytics] Failed to send events, will retry later');
     } finally {
       _isFlushing = false;

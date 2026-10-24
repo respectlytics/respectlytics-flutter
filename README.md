@@ -103,6 +103,9 @@ What is dropped:
 A dropped property never stops the event: it is sent with the properties that passed.
 In debug builds the SDK prints which names it dropped and why, never their values.
 
+A self-hosted Community Edition server keeps no properties, and the event is still kept.
+If the server is older than this SDK and refuses the properties, the SDK sends the event again without them.
+
 ## Self-Hosted Server
 
 If you're running the [Respectlytics Community Edition](https://github.com/respectlytics/respectlytics), point the SDK at your own server:
@@ -180,6 +183,9 @@ Events are queued in memory and sent automatically:
 - When app goes to background
 - When `flush()` is called
 - When the device comes back online
+
+An event the server refuses as invalid (400) is dropped, so it never holds up the events after it.
+Once the server has confirmed an event, the SDK does not send it again.
 
 **Unsent events are lost on force-quit** — this is a deliberate privacy trade-off. The SDK writes zero bytes to the device for analytics purposes. The ~1-3% event loss from force-quits has no meaningful impact on session-based aggregate analytics.
 

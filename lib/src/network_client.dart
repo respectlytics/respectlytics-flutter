@@ -42,14 +42,47 @@ class NetworkClient {
   NetworkClient({required this.configuration, http.Client? client})
     : _client = client ?? http.Client();
 
-  /// Send a batch of events to the API.
+  /// Send one event to the API.
   ///
-  /// Retries on network errors and 5xx responses with exponential backoff.
-  /// Throws [NetworkError] on permanent failures.
-  Future<void> sendEvents(List<Event> events) async {
-    for (final event in events) {
+  /// Retries on network errors, 429 and 5xx responses with exponential
+  /// backoff, and throws [NetworkError] when sending is worth trying again
+  /// later.
+  ///
+  /// A 400 is final, since no retry can change it. An event with properties
+  /// is then sent once more without them, for a server older than v3.1.0 (a
+  /// self-hosted Community Edition not yet updated) that refuses the
+  /// properties field. If the server refuses the event itself, it is dropped,
+  /// so it never holds up the events queued after it.
+  Future<void> sendEvent(Event event) async {
+    try {
       await _sendEventWithRetry(event, attempt: 0);
+      return;
+    } on NetworkError catch (e) {
+      if (e.type != NetworkErrorType.badRequest) rethrow;
     }
+
+    if (event.properties.isNotEmpty) {
+      try {
+        await _sendEventWithRetry(
+          Event(
+            eventName: event.eventName,
+            timestamp: event.timestamp,
+            sessionId: event.sessionId,
+            platform: event.platform,
+          ),
+          attempt: 0,
+        );
+        print(
+          '[Respectlytics] ⚠️ Server refused the properties, '
+          'event sent without them',
+        );
+        return;
+      } on NetworkError catch (e) {
+        if (e.type != NetworkErrorType.badRequest) rethrow;
+      }
+    }
+
+    print('[Respectlytics] ⚠️ Server refused an event (400), dropped');
   }
 
   Future<void> _sendEventWithRetry(Event event, {required int attempt}) async {

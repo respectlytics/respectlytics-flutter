@@ -70,7 +70,7 @@ class Respectlytics {
     _eventQueue = EventQueue(configuration: _configuration!);
     _platform = _detectPlatform();
 
-    print('[Respectlytics] ✓ SDK configured (v3.1.1)');
+    print('[Respectlytics] ✓ SDK configured (v3.1.2)');
   }
 
   /// Detect the current platform.
